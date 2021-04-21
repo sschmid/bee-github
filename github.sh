@@ -71,6 +71,13 @@ github::upload_assets() {
   fi
 }
 
+github::repos() {
+  local org="${1:-$GITHUB_ORG}"
+  curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/orgs/${org}/repos"
+}
+
 github::teams() {
   curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
     "https://api.github.com/repos/${GITHUB_REPO}/teams"
