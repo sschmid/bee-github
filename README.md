@@ -74,6 +74,34 @@ Set repository topics
 ```sh
 bee github::set_topics bash bee
 ```
+
+## `github::get_branch_protection <branch>`
+Get branch protection
+
+## `github::update_branch_protection <branch> <data>`
+Update branch protection
+
+### Example
+```sh
+data=$(cat <<EOF
+{
+  "required_status_checks": null,
+  "enforce_admins": false,
+  "required_pull_request_reviews": {
+    "dismissal_restrictions": {
+      "users": [],
+      "teams": []
+    },
+    "dismiss_stale_reviews": true,
+    "require_code_owner_reviews": false,
+    "required_approving_review_count": 1
+  },
+  "restrictions": null
+}
+EOF
+)
+github::update_branch_protection main "${data}"
+```
 ----------------------------------------
 
 ## Dependencies

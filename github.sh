@@ -134,3 +134,23 @@ join_by() {
   shift
   echo "$*"
 }
+
+github::get_branch_protection() {
+  local branch="$1"
+  curl \
+    -u "${GITHUB_ORG}:$GITHUB_ACCESS_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/repos/${GITHUB_REPO}/branches/${branch}/protection"
+}
+
+github::update_branch_protection() {
+  local branch="$1"
+  local data="$2"
+  curl \
+    -X PUT \
+    -H "Accept: application/vnd.github.v3+json" \
+    -H "Accept: application/vnd.github.luke-cage-preview+json" \
+    -u "${GITHUB_ORG}:$GITHUB_ACCESS_TOKEN" \
+    -d "${data}" \
+    "https://api.github.com/repos/${GITHUB_REPO}/branches/${branch}/protection"
+}
