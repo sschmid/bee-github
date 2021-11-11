@@ -8,8 +8,8 @@ GITHUB_REPO="${GITHUB_ORG}/${BEE_PROJECT}"
 GITHUB_CHANGES=CHANGES.md
 GITHUB_RELEASE_PREFIX="${BEE_PROJECT}-"
 GITHUB_ASSETS_ZIP=("Build/${BEE_PROJECT}.zip")
-# Potentially sensitive data. Do not commit.
-GITHUB_ACCESS_TOKEN="0123456789"'
+# secrets:
+# github.token'
 }
 
 github::_deps() {
@@ -17,26 +17,30 @@ github::_deps() {
 }
 
 github::me() {
-  curl -s -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+  local token
+  token="$(bee::secrets github.token)"
+  curl -s -H "Authorization: token ${token}" \
     "https://api.github.com/user"
 }
 
 github::org() {
-  local name="${1}"
-  curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+  local name="${1}" token
+  token="$(bee::secrets github.token)"
+  curl -H "Authorization: token ${token}" \
     "https://api.github.com/orgs/${name}"
 }
 
 github::create_org_repo() {
-  local name="$1"
-  local private="$2"
-  curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+  local name="$1" private="$2" token
+  token="$(bee::secrets github.token)"
+  curl -H "Authorization: token ${token}" \
     -d "{\"name\": \"${name}\", \"private\": ${private}}" \
     "https://api.github.com/orgs/${GITHUB_ORG}/repos"
 }
 
 github::create_release() {
-  local version changes data
+  local version changes data token
+  token="$(bee::secrets github.token)"
   version="$(version::read)"
   changes="$(cat "${GITHUB_CHANGES}")"
   changes="${changes//$'\n'/\\n}"
@@ -48,18 +52,18 @@ github::create_release() {
 }
 EOF
 )
-  curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+  curl -H "Authorization: token ${token}" \
     -d "${data}" \
     "https://api.github.com/repos/${GITHUB_REPO}/releases"
 }
 
 github::upload_assets() {
   if [[ ${#GITHUB_ASSETS_ZIP[@]} -gt 0 ]]; then
-    local id="$1"
-    local upload_url="https://uploads.github.com/repos/${GITHUB_REPO}/releases/${id}/assets"
+    local id="$1" upload_url="https://uploads.github.com/repos/${GITHUB_REPO}/releases/${id}/assets" token
+    token="$(bee::secrets github.token)"
     for f in "${GITHUB_ASSETS_ZIP[@]}"; do
       {
-        curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+        curl -H "Authorization: token ${token}" \
           -H "Content-Type:application/zip" \
           --data-binary "@${f}" \
           "${upload_url}"?name="$(basename "${f}")"
@@ -72,58 +76,62 @@ github::upload_assets() {
 }
 
 github::repos() {
-  local org="${1:-$GITHUB_ORG}"
-  curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+  local org="${1:-$GITHUB_ORG}" token
+  token="$(bee::secrets github.token)"
+  curl -H "Authorization: token ${token}" \
     -H "Accept: application/vnd.github.v3+json" \
     "https://api.github.com/orgs/${org}/repos"
 }
 
 github::teams() {
-  curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+  local token
+  token="$(bee::secrets github.token)"
+  curl -H "Authorization: token ${token}" \
     "https://api.github.com/repos/${GITHUB_REPO}/teams"
 }
 
 github::add_team() {
-  local id="$1"
-  local permission="$2"
-  local data="{\"permission\": \"${permission}\"}"
+  local id="$1" permission="$2" data="{\"permission\": \"${permission}\"}" token
+  token="$(bee::secrets github.token)"
   curl -X PUT \
-    -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+    -H "Authorization: token ${token}" \
     -d "${data}" \
     "https://api.github.com/organizations/${GITHUB_ORG_ID}/team/${id}/repos/${GITHUB_REPO}"
 }
 
 github::remove_team() {
-  local id="$1"
+  local id="$1" token
+  token="$(bee::secrets github.token)"
   curl -X DELETE \
-    -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+    -H "Authorization: token ${token}" \
     "https://api.github.com/organizations/${GITHUB_ORG_ID}/team/${id}/repos/${GITHUB_REPO}"
 }
 
 github::add_user() {
-  local user_name="$1"
-  local permission="$2"
-  local data="{\"permission\": \"${permission}\"}"
+  local user_name="$1" permission="$2" data="{\"permission\": \"${permission}\"}" token
+  token="$(bee::secrets github.token)"
   curl -X PUT \
-    -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+    -H "Authorization: token ${token}" \
     -d "${data}" \
     "https://api.github.com/repos/${GITHUB_REPO}/collaborators/${user_name}"
 }
 
 github::remove_user() {
-  local user_name="$1"
+  local user_name="$1" token
+  token="$(bee::secrets github.token)"
   curl -X DELETE \
-    -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+    -H "Authorization: token ${token}" \
     "https://api.github.com/repos/${GITHUB_REPO}/collaborators/${user_name}"
 }
 
 github::set_topics() {
-  local -a topics=("$@")
+  local -a topics=("$@") data token
   topics=("${topics[@]/#/\"}")
   topics=("${topics[@]/%/\"}")
-  local data="{\"names\":[$(join_by "," "${topics[@]}")]}"
+  data="{\"names\":[$(join_by "," "${topics[@]}")]}"
+  token="$(bee::secrets github.token)"
   curl -X PUT \
-    -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
+    -H "Authorization: token ${token}" \
     -H "Accept: application/vnd.github.mercy-preview+json" \
     -d "${data}" \
     "https://api.github.com/repos/${GITHUB_REPO}/topics"
@@ -136,21 +144,22 @@ join_by() {
 }
 
 github::get_branch_protection() {
-  local branch="$1"
+  local branch="$1" token
+  token="$(bee::secrets github.token)"
   curl \
-    -u "${GITHUB_ORG}:$GITHUB_ACCESS_TOKEN" \
+    -u "${GITHUB_ORG}:${token}" \
     -H "Accept: application/vnd.github.v3+json" \
     "https://api.github.com/repos/${GITHUB_REPO}/branches/${branch}/protection"
 }
 
 github::update_branch_protection() {
-  local branch="$1"
-  local data="$2"
+  local branch="$1" data="$2" token
+  token="$(bee::secrets github.token)"
   curl \
     -X PUT \
     -H "Accept: application/vnd.github.v3+json" \
     -H "Accept: application/vnd.github.luke-cage-preview+json" \
-    -u "${GITHUB_ORG}:$GITHUB_ACCESS_TOKEN" \
+    -u "${GITHUB_ORG}:${token}" \
     -d "${data}" \
     "https://api.github.com/repos/${GITHUB_REPO}/branches/${branch}/protection"
 }
