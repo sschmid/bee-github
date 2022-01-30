@@ -1,0 +1,7 @@
+{
+  "homepage": "https://github.com/sschmid/bee-github",
+  "info": "Useful functions for GitHub",
+  "dependencies": [
+    "semver"
+  ]
+}

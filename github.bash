@@ -6,8 +6,6 @@ if [[ ! -v GITHUB_ASSETS_ZIP ]]; then GITHUB_ASSETS_ZIP=(); fi
 
 github::help() {
   cat << 'EOF'
-Useful commands for GitHub - https://github.com/sschmid/bee-github
-
 template:
 
   GITHUB_ORG="org"
@@ -57,23 +55,11 @@ usage:
                                                "restrictions": null
                                              }
 
-bee dependencies:
-
-EOF
-
-  github::deps | xargs -I {} echo "  {}"
-  echo
-
-  cat << 'EOF'
-dependencies:
+requirements:
 
   curl
 
 EOF
-}
-
-github::deps() {
-  echo "semver"
 }
 
 github::me() {
