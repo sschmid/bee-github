@@ -110,12 +110,12 @@ EOF
 
 github::upload_assets() {
   if [[ ${#GITHUB_ASSETS_ZIP[@]} -gt 0 ]]; then
-    local id="$1" upload_url="https://uploads.github.com/repos/${GITHUB_REPO}/releases/${id}/assets"
+    local id="$1"
     for zip in "${GITHUB_ASSETS_ZIP[@]}"; do
       curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
         -H "Content-Type:application/zip" \
         --data-binary "@${zip}" \
-        "${upload_url}"?name="$(basename "${zip}")"
+        "https://uploads.github.com/repos/${GITHUB_REPO}/releases/${id}/assets?name=$(basename "${zip}")"
     done
   fi
 }
