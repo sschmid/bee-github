@@ -24,6 +24,7 @@ usage:
   me                                         get the current authenticated user
   org <org>                                  get an organization
   create_org_repo <repo> <private>           create a new (private <true | false>) github organization repository
+  releases [<params>]                        list releases
   create_release                             create a new release based on the current version using the text from GITHUB_CHANGES
   upload_assets <release-id>                 upload GITHUB_ASSETS_ZIP to a release
   repos [<org>]                              list repositories (for the specified organization)
@@ -54,6 +55,9 @@ usage:
                                                },
                                                "restrictions": null
                                              }
+  runs [<params>]                            list workflow runs
+  artifacts [<run-id>]                       list artifacts for a workflow run
+  download <artifact-id> <artifact-name>     download an artifact from a workflow run
 
 requirements:
 
@@ -78,6 +82,12 @@ github::create_org_repo() {
   curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
     -d "{\"name\": \"${name}\", \"private\": ${private}}" \
     "https://api.github.com/orgs/${GITHUB_ORG}/repos"
+}
+
+github::releases() {
+  local params="${1:-}"
+  curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    "https://api.github.com/repos/${GITHUB_REPO}/releases${params}"
 }
 
 github::create_release() {
@@ -189,4 +199,24 @@ github::update_branch_protection() {
     -u "${GITHUB_ORG}:${GITHUB_TOKEN}" \
     -d "${data}" \
     "https://api.github.com/repos/${GITHUB_REPO}/branches/${branch}/protection"
+}
+
+github::runs() {
+  local params="${1:-}"
+  curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    "https://api.github.com/repos/${GITHUB_REPO}/actions/runs${params}"
+}
+
+github::artifacts() {
+  local run_id="$1"
+  curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    "https://api.github.com/repos/${GITHUB_REPO}/actions/runs/${run_id}/artifacts"
+}
+
+github::download() {
+  local artifact_id="$1"
+  local output_name="$2"
+  curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+    -L "https://api.github.com/repos/${GITHUB_REPO}/actions/artifacts/${artifact_id}/zip" \
+    -o "${output_name}.zip"
 }
