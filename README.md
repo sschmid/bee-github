@@ -22,6 +22,7 @@ usage:
   me                                         get the current authenticated user
   org <org>                                  get an organization
   create_org_repo <repo> <private>           create a new (private <true | false>) github organization repository
+  releases [<params>]                        list releases
   create_release                             create a new release based on the current version using the text from GITHUB_CHANGES
   upload_assets <release-id>                 upload GITHUB_ASSETS_ZIP to a release
   repos [<org>]                              list repositories (for the specified organization)
@@ -52,6 +53,9 @@ usage:
                                                },
                                                "restrictions": null
                                              }
+  runs [<params>]                            list workflow runs
+  artifacts [<run-id>]                       list artifacts for a workflow run
+  download <artifact-id> <artifact-name>     download an artifact from a workflow run
 
 requirements:
 
