@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2025-06-15
+### Fixed
+- Fix `github::upload_assets`
+
 ## [2.1.0] - 2025-06-15
 ### Added
 - Add `github::releases`
@@ -32,7 +36,8 @@ like the official beehub: https://github.com/sschmid/beehub
 This is the initial version that contains all changes up to bee-0.39.0.
 The code has been refactored and updated to follow the bee conventions.
 
-[Unreleased]: https://github.com/sschmid/bee-github/compare/2.1.0...HEAD
+[Unreleased]: https://github.com/sschmid/bee-github/compare/2.2.0...HEAD
+[2.2.0]: https://github.com/sschmid/bee-github/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/sschmid/bee-github/compare/2.0.0...2.1.0
 [2.0.0]: https://github.com/sschmid/bee-github/compare/1.1.0...2.0.0
 [1.1.0]: https://github.com/sschmid/bee-github/compare/1.0.0...1.1.0
