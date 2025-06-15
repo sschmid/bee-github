@@ -69,13 +69,13 @@ github::me() {
 
 github::org() {
   local name="${1}"
-  curl -H "Authorization: token ${GITHUB_TOKEN}" \
+  curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/orgs/${name}"
 }
 
 github::create_org_repo() {
   local name="$1" private="$2"
-  curl -H "Authorization: token ${GITHUB_TOKEN}" \
+  curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
     -d "{\"name\": \"${name}\", \"private\": ${private}}" \
     "https://api.github.com/orgs/${GITHUB_ORG}/repos"
 }
@@ -93,7 +93,7 @@ github::create_release() {
 }
 EOF
   )
-  curl -H "Authorization: token ${GITHUB_TOKEN}" \
+  curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
     -d "${data}" \
     "https://api.github.com/repos/${GITHUB_REPO}/releases"
 }
@@ -102,7 +102,7 @@ github::upload_assets() {
   if [[ ${#GITHUB_ASSETS_ZIP[@]} -gt 0 ]]; then
     local id="$1" upload_url="https://uploads.github.com/repos/${GITHUB_REPO}/releases/${id}/assets"
     for zip in "${GITHUB_ASSETS_ZIP[@]}"; do
-      curl -H "Authorization: token ${GITHUB_TOKEN}" \
+      curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
         -H "Content-Type:application/zip" \
         --data-binary "@${zip}" \
         "${upload_url}"?name="$(basename "${zip}")"
@@ -112,20 +112,20 @@ github::upload_assets() {
 
 github::repos() {
   local org="${1:-$GITHUB_ORG}"
-  curl -H "Authorization: token ${GITHUB_TOKEN}" \
+  curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
     -H "Accept: application/vnd.github.v3+json" \
     "https://api.github.com/orgs/${org}/repos"
 }
 
 github::teams() {
-  curl -H "Authorization: token ${GITHUB_TOKEN}" \
+  curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/repos/${GITHUB_REPO}/teams"
 }
 
 github::add_team() {
   local id="$1" permission="$2"
   local data="{\"permission\": \"${permission}\"}"
-  curl -X PUT \
+  curl -s -X PUT \
     -H "Authorization: token ${GITHUB_TOKEN}" \
     -d "${data}" \
     "https://api.github.com/organizations/${GITHUB_ORG_ID}/team/${id}/repos/${GITHUB_REPO}"
@@ -133,7 +133,7 @@ github::add_team() {
 
 github::remove_team() {
   local id="$1"
-  curl -X DELETE \
+  curl -s -X DELETE \
     -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/organizations/${GITHUB_ORG_ID}/team/${id}/repos/${GITHUB_REPO}"
 }
@@ -141,7 +141,7 @@ github::remove_team() {
 github::add_user() {
   local user_name="$1" permission="$2"
   local data="{\"permission\": \"${permission}\"}"
-  curl -X PUT \
+  curl -s -X PUT \
     -H "Authorization: token ${GITHUB_TOKEN}" \
     -d "${data}" \
     "https://api.github.com/repos/${GITHUB_REPO}/collaborators/${user_name}"
@@ -149,7 +149,7 @@ github::add_user() {
 
 github::remove_user() {
   local user_name="$1"
-  curl -X DELETE \
+  curl -s -X DELETE \
     -H "Authorization: token ${GITHUB_TOKEN}" \
     "https://api.github.com/repos/${GITHUB_REPO}/collaborators/${user_name}"
 }
@@ -159,7 +159,7 @@ github::set_topics() {
   topics=("${topics[@]/#/\"}")
   topics=("${topics[@]/%/\"}")
   data="{\"names\":[$(join_by "," "${topics[@]}")]}"
-  curl -X PUT \
+  curl -s -X PUT \
     -H "Authorization: token ${GITHUB_TOKEN}" \
     -H "Accept: application/vnd.github.mercy-preview+json" \
     -d "${data}" \
@@ -174,15 +174,15 @@ join_by() {
 
 github::get_branch_protection() {
   local branch="$1"
-  curl \
-    -u "${GITHUB_ORG}:${GITHUB_TOKEN}" \
+  curl -s \
     -H "Accept: application/vnd.github.v3+json" \
+    -u "${GITHUB_ORG}:${GITHUB_TOKEN}" \
     "https://api.github.com/repos/${GITHUB_REPO}/branches/${branch}/protection"
 }
 
 github::update_branch_protection() {
   local branch="$1" data="$2"
-  curl \
+  curl -s \
     -X PUT \
     -H "Accept: application/vnd.github.v3+json" \
     -H "Accept: application/vnd.github.luke-cage-preview+json" \
